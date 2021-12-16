@@ -58,7 +58,6 @@ async function addSourceCmds(
 }
 
 async function runDotnetRestore(
-  packageFileName: string,
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const execOptions: ExecOptions = {
@@ -76,7 +75,8 @@ async function runDotnetRestore(
   );
   const cmds = [
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
-    `dotnet restore ${packageFileName} --force-evaluate --configfile ${nugetConfigFile}`,
+    `dotnet restore $(echo $(find . -name "*.csproj" -o -name "*.vbproj" -o -name "*.fsproj" )) --force-evaluate --configfile ${nugetConfigFile}`,
+
   ];
   logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
@@ -125,8 +125,6 @@ export async function updateArtifacts({
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-
-    await runDotnetRestore(packageFileName, config);
 
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newLockFileContent) {
