@@ -2,6 +2,8 @@ import stream from 'stream';
 import util from 'util';
 import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
+import glob from 'glob';
+import path from 'path';
 import { isAbsolute, join, parse } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -150,4 +152,20 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
 
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
+}
+
+export function findFilesByExtensionsRecursively(
+  directory: string,
+  extensions: string[]
+): Promise<string[]> {
+  const pattern = extensions.join('|');
+  const globPromise = util.promisify(glob);
+  return globPromise(`**/*.@(${pattern})`);
+}
+
+export function relativePathToAbsolute(
+  currentDirectory: string,
+  relativePath: string
+): string {
+  return path.resolve(`${currentDirectory}/${relativePath}`);
 }

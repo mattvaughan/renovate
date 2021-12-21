@@ -3,7 +3,7 @@
 exports[`manager/nuget/artifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -46,7 +46,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -73,7 +73,7 @@ exports[`manager/nuget/artifacts does not update lock file when non-proj file is
 exports[`manager/nuget/artifacts performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -114,7 +114,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -149,7 +149,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -172,7 +172,7 @@ Array [
 exports[`manager/nuget/artifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -195,7 +195,7 @@ Array [
 exports[`manager/nuget/artifacts updates lock file 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
+    "cmd": "dotnet restore $(echo $(find . -name '*.csproj' -o -name '*.vbproj' -o -name '*.fsproj' )) --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
