@@ -160,7 +160,16 @@ export function findFilesByExtensionsRecursively(
 ): Promise<string[]> {
   const pattern = extensions.join('|');
   const globPromise = util.promisify(glob);
-  return globPromise(`**/*.@(${pattern})`);
+  return globPromise(`${directory}/**/*.@(${pattern})`);
+}
+
+export function findFilesByNameRecursively(
+  directory: string,
+  name: string
+): Promise<string[]> {
+  const pattern = 'packages.lock.json';
+  const globPromise = util.promisify(glob);
+  return globPromise(`${directory}/**/${pattern}`);
 }
 
 export function relativePathToAbsolute(

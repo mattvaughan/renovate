@@ -1,6 +1,7 @@
-import { join } from 'path';
+import { join, relative } from 'path';
 import et from 'elementtree';
 import { quote } from 'shlex';
+import * as fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
@@ -12,7 +13,7 @@ import {
   getSiblingFileName,
   outputFile,
   readLocalFile,
-  //relativePathToAbsolute,
+  findFilesByNameRecursively,
   remove,
   writeLocalFile,
 } from '../../util/fs';
@@ -28,6 +29,7 @@ import {
   getDefaultRegistries,
   getRandomString,
 } from './util';
+import { getFilesToRestore } from './tree';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -82,7 +84,7 @@ async function getDependentProjectFiles(projectFilePath: string): Promise<string
 async function runDotnetRestore(
   packageFileName: string,
   config: UpdateArtifactsConfig
-): Promise<void> {
+): Promise<string[]> {
   const execOptions: ExecOptions = {
     docker: {
       image: 'dotnet',
@@ -97,8 +99,8 @@ async function runDotnetRestore(
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
   );
 
-  debugger;
-  const projectsToRestore = await getDependentProjectFiles(packageFileName);
+  const { localDir } = GlobalConfig.get();
+  const projectsToRestore = await getFilesToRestore(packageFileName, localDir);
 
   const cmds = [
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
@@ -108,6 +110,8 @@ async function runDotnetRestore(
   cmds.shift();
   await exec(cmds, execOptions);
   await remove(nugetConfigDir);
+
+  return projectsToRestore;
 }
 
 export async function updateArtifacts({
@@ -133,11 +137,20 @@ export async function updateArtifacts({
     packageFileName,
     'packages.lock.json'
   );
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+
+  const { localDir } = GlobalConfig.get();
+  const allLockFiles = await findFilesByNameRecursively(localDir, 'packages.lock.json');
+  const lockFileContentMap = {};
+
+  for (const path of allLockFiles) {
+    const content = await fs.readFile(path, 'utf8');
+    lockFileContentMap[path]= content;
+  }
+
+  // TODO: Do a real check
+  if (!lockFileContentMap) {
     logger.info(
-      { packageFileName },
-      'No lock file found beneath package file.'
+      'No lock files found'
     );
     return null;
   }
@@ -152,22 +165,30 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    await runDotnetRestore(packageFileName, config);
+    const restoredProjects = await runDotnetRestore(packageFileName, config);
 
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newLockFileContent) {
-      logger.info(`Lock file is unchanged`);
-      return null;
-    }
-    logger.info('Returning updated lock file');
-    return [
-      {
+    const updatedFiles = Promise.all(restoredProjects.map(async p => {
+      const lockFile = getSiblingFileName(
+        p,
+        'packages.lock.json'
+      );
+      debugger;
+      const newLockFileContent = await fs.readFile(lockFile, 'utf8');
+      if (lockFileContentMap[lockFile] === newLockFileContent) {
+        logger.info(`Lock file ${lockFile} is unchanged`);
+        return null;
+      }
+
+      return {
         file: {
-          name: lockFileName,
-          contents: await readLocalFile(lockFileName),
-        },
-      },
-    ];
+          name: relative(localDir, lockFile),
+          contents: newLockFileContent
+        }
+      };
+    }));
+
+    logger.info('Returning updated lock file(s)');
+    return updatedFiles;
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {

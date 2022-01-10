@@ -30,6 +30,7 @@ export function commitFilesToBranch(
     return null;
   }
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
+  debugger;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
